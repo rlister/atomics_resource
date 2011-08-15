@@ -6,6 +6,11 @@ module AtomicsResource
 
   class Base
 
+    ## Do some mix-ins to get various bits of rails coolness, skip these for non-rails.
+    if defined? RAILS_ROOT
+      extend ActiveModel::Naming  # need this for model_name and variants, used to get paths from objects
+    end
+
     ## class instance variables
     class << self
       attr_accessor :atomics_type, :table_name, :primary_key
@@ -236,11 +241,6 @@ module AtomicsResource
       attributes[self.class.primary_key]
     end
 
-  end
-
-  ## Do some mix-ins to get various bits of rails coolness, skip these for non-rails.
-  if defined? RAILS_ROOT
-    extend ActiveModel::Naming  # need this for model_name and variants, used to get paths from objects
   end
 
 end

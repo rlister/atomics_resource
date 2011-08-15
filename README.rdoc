@@ -19,6 +19,13 @@ AtomicsResource::Base. Class find methods are mapped to HTTP GET
 requests. XML responses are parsed and mapped to an instance of the
 class.
 
+=== Rails
+
+Rails is not required, atomics_resource may be used in any Ruby
+code. However, if RAILS_ROOT is defined, the module will extend
+ActiveModel::Naming, which provides polymorphics paths for use in
+views.
+
 === Configuration
 
 To use an instance, you will need to create a yaml file with atomics
@@ -85,7 +92,9 @@ Convenience functions:
 
 == Contributing to atomics_resource
 
-The project is available for forking at github.
+The project is available for forking at github:
+https://github.com/rlister/atomics_resource. Please contribute any
+bugfixes or improvements.
 
 == Copyright
 
