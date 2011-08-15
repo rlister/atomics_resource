@@ -1,19 +1,92 @@
-= atomics_resource
+= Atomics Resource
 
-Description goes here.
+Ruby and/or Rails interface for Atomics queries. Atomics is MySQL over
+HTTP, originally developed at CNET and has similar intent to DBSlayer.
+
+== Philosophy
+
+This module use a different approach from
+e.g. activerecord-dbslayer-adapter, which subclasses the MySQL adapter
+in order to use ActiveRecord. Rather, AtomicsResource is a lightweight
+re-implementation of some ActiveRecord-style methods, which means the
+module can be used in non-Rails apps, or mixed with non-MySQL
+connections in a Rails app.
+
+== Overview
+
+Classes representing resources in atomics are created by subclassing
+AtomicsResource::Base. Class find methods are mapped to HTTP GET
+requests. XML responses are parsed and mapped to an instance of the
+class.
+
+=== Configuration
+
+To use an instance, you will need to create a yaml file with atomics
+configs, e.g. config/atomics.yml:
+
+    hr:
+      host: hr-atomics.newco.com
+      port: 8080
+      path: /jAtomics/select/?version=1
+
+then load the file into a hash called ATOMICS_CONFIG; in Rails this is
+best done from an initializer, e.g. config/initializers/atomics_config.rb:
+
+    ATOMICS_CONFIG = YAML.load_file("#{RAILS_ROOT}/config/atomics.yml")
+
+=== Usage
+
+Your model will look like this:
+
+    class Employee < AtomicsResource::Base
+      set_atomics_type :hr                #section of config file to read
+      set_table_name   :employee_display  #default table for requests
+      set_primary_key  :id                #default key for find() methods
+
+      ## default columns to SELECT, if none-given default will be '*'
+      column :first_name
+      column :last_name
+      column :title
+      column :team_id
+    end
+
+and a simple controller:
+
+    class EmployeesController < ApplicationController
+      def index
+        @employees = Employee.all(:conditions => [ "team_id = ?", params[:team] ]
+                                  :order      => [ :last_name, :first_name ])
+      end
+
+      def show
+        @employee = Employee.find(params[:id])
+      end
+    end
+
+Conditions may be given as follows:
+
+    :conditions => "team_id = 156 AND title = 'Manager'"
+    :conditions => [ "team_id = ? AND title = ?", 156, 'Manager' ]
+    :conditions => [ "team_id = %d AND title = %s", 156 , 'Manager' ]
+    :conditions => { :team_id => 156, :title => :Manager }
+
+Columns: in general you don't want to do "SELECT *" from Atomics
+tables, which are frequently huge, denormalized beasts which will put
+a lot of extra data on the wire that you don't want. Instead, list in
+the model the columns you normally want, using 'column'. These will be
+used to create the default 'SELECT' statement in find(). This can be
+overridden using something like find(:all, :select=>'*').
+
+Convenience functions:
+
+    Employee.all(99)     ## equivalent to Employee.find(:all,   :conditions => {:id = 99})
+    Employee.first(99)   ## equivalent to Employee.find(:first, :conditions => {:id = 99})
+    Employee.last(99)    ## equivalent to Employee.find(:last,  :conditions => {:id = 99})
 
 == Contributing to atomics_resource
- 
-* Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
-* Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
-* Fork the project
-* Start a feature/bugfix branch
-* Commit and push until you are happy with your contribution
-* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
-* Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
+
+The project is available for forking at github.
 
 == Copyright
 
-Copyright (c) 2011 Richard Lister. See LICENSE.txt for
-further details.
-
+Copyright (c) 2011 Richard Lister. See LICENSE.txt for further details.
