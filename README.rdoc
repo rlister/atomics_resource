@@ -1,7 +1,9 @@
 = Atomics Resource
 
 Ruby and/or Rails interface for Atomics queries. Atomics is MySQL over
-HTTP, originally developed at CNET and has similar intent to DBSlayer.
+HTTP, originally developed at CNET and has similar intent to DBSlayer
+(see
+{MySQL in an Enterprise Search Architecture}[http://conferences.oreillynet.com/cs/mysqluc2005/view/e_sess/7066]).
 
 == Philosophy
 
